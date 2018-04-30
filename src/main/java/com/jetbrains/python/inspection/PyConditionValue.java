@@ -100,15 +100,46 @@ public class PyConditionValue {
             setThisUndefined();
             return;
         } else if (op.equals(PyTokenTypes.EXP)) {
+            BigInteger l = left.getBigInteger();
+            int r = right.getBigInteger().intValueExact();
+            if (l.equals(BigInteger.ZERO)) {
+                if (r == 0) {
+                    setThis(BigInteger.ONE);
+                    return;
+                } else if (r < 0) {
+                    setThisUndefined();
+                    return;
+                }
+            }
             setThis(left.getBigInteger().pow(right.getBigInteger().intValueExact()));
         } else if (op.equals(PyTokenTypes.FLOORDIV)) {
-            setThis(left.getBigInteger().divide(right.getBigInteger()));
+            BigInteger divider = right.getBigInteger();
+            if (divider.equals(BigInteger.ZERO)) {
+                setThisUndefined();
+                return;
+            }
+            setThis(left.getBigInteger().divide(divider));
         } else if (op.equals(PyTokenTypes.PERC)) {
-            setThis(left.getBigInteger().mod(right.getBigInteger()));
+            BigInteger divider = right.getBigInteger();
+            if (divider.equals(BigInteger.ZERO)) {
+                setThisUndefined();
+                return;
+            }
+            setThis(left.getBigInteger().mod(divider));
         } else if (op.equals(PyTokenTypes.LTLT)) {
-            setThis(left.getBigInteger().shiftLeft(right.getBigInteger().intValueExact()));
+            int shift = right.getBigInteger().intValueExact();
+            if (shift < 0) {
+                setThisUndefined();
+                return;
+            }
+            setThis(left.getBigInteger().shiftLeft(shift));
         } else if (op.equals(PyTokenTypes.GTGT)) {
-            setThis(left.getBigInteger().shiftRight(right.getBigInteger().intValueExact()));
+            int shift = right.getBigInteger().intValueExact();
+            if (shift < 0) {
+                setThisUndefined();
+                return;
+            }
+            setThis(left.getBigInteger().shiftRight(shift));
         } else if (op.equals(PyTokenTypes.XOR)) {
             setThis(left.getBigInteger().xor(right.getBigInteger()));
         } else if (op.equals(PyTokenTypes.AND)) {
