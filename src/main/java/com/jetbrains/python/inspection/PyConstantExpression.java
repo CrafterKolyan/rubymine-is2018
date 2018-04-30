@@ -138,10 +138,16 @@ public class PyConstantExpression extends PyInspection {
             PyConditionValue right = process(pyExpr.getRightExpression());
             PyElementType op = pyExpr.getOperator();
 
-            if (op.equals(PyTokenTypes.AND_KEYWORD)) {
-                return new PyConditionValue(left.getBoolean() ? right : left);
-            } else if (op.equals(PyTokenTypes.OR_KEYWORD)) {
-                return new PyConditionValue(left.getBoolean() ? left : right);
+            if (left.isDetermined()) {
+                if (op.equals(PyTokenTypes.AND_KEYWORD)) {
+                    return new PyConditionValue(left.getBoolean() ? right : left);
+                } else if (op.equals(PyTokenTypes.OR_KEYWORD)) {
+                    return new PyConditionValue(left.getBoolean() ? left : right);
+                } else if (left.getBoolean() == false && (op.equals(PyTokenTypes.LT) || op.equals(PyTokenTypes.LE)
+                        || op.equals(PyTokenTypes.GT) || op.equals(PyTokenTypes.GE)
+                        || op.equals(PyTokenTypes.EQEQ) || op.equals(PyTokenTypes.NE) || op.equals(PyTokenTypes.NE_OLD))) {
+                    return new PyConditionValue(false);
+                }
             }
 
             if (!left.isDetermined() || !right.isDetermined()) {
