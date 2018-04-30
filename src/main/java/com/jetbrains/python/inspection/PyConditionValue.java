@@ -55,13 +55,13 @@ public class PyConditionValue {
         PyElementType operator = pyExpr.getOperator();
 
         if (operator.equals(PyTokenTypes.PLUS)) {
-            setThis(operand.toBigInteger());
+            setThis(operand.getBigInteger());
         } else if (operator.equals(PyTokenTypes.MINUS)) {
-            setThis(operand.toBigInteger().negate());
+            setThis(operand.getBigInteger().negate());
         } else if (operator.equals(PyTokenTypes.NOT_KEYWORD)) {
-            setThis(!operand.toBoolean());
+            setThis(!operand.getBoolean());
         } else if (operator.equals(PyTokenTypes.TILDE)) {
-            setThis(operand.toBigInteger().negate().subtract(BigInteger.ONE));
+            setThis(operand.getBigInteger().negate().subtract(BigInteger.ONE));
         } else {
             setThisUndefined();
         }
@@ -78,47 +78,47 @@ public class PyConditionValue {
         }
 
         if (op.equals(PyTokenTypes.LT)) {
-            setThis(left.toBigInteger().compareTo(right.toBigInteger()) < 0);
+            setThis(left.getBigInteger().compareTo(right.getBigInteger()) < 0);
         } else if (op.equals(PyTokenTypes.LE)) {
-            setThis(left.toBigInteger().compareTo(right.toBigInteger()) <= 0);
+            setThis(left.getBigInteger().compareTo(right.getBigInteger()) <= 0);
         } else if (op.equals(PyTokenTypes.GT)) {
-            setThis(left.toBigInteger().compareTo(right.toBigInteger()) > 0);
+            setThis(left.getBigInteger().compareTo(right.getBigInteger()) > 0);
         } else if (op.equals(PyTokenTypes.GE)) {
-            setThis(left.toBigInteger().compareTo(right.toBigInteger()) >= 0);
+            setThis(left.getBigInteger().compareTo(right.getBigInteger()) >= 0);
         } else if (op.equals(PyTokenTypes.EQEQ)) {
-            setThis(left.toBigInteger().compareTo(right.toBigInteger()) == 0);
+            setThis(left.getBigInteger().compareTo(right.getBigInteger()) == 0);
         } else if (op.equals(PyTokenTypes.NE) || op.equals(PyTokenTypes.NE_OLD)) {
-            setThis(left.toBigInteger().compareTo(right.toBigInteger()) != 0);
+            setThis(left.getBigInteger().compareTo(right.getBigInteger()) != 0);
         } else if (op.equals(PyTokenTypes.PLUS)) {
-            setThis(left.toBigInteger().add(right.toBigInteger()));
+            setThis(left.getBigInteger().add(right.getBigInteger()));
         } else if (op.equals(PyTokenTypes.MINUS)) {
-            setThis(left.toBigInteger().subtract(right.toBigInteger()));
+            setThis(left.getBigInteger().subtract(right.getBigInteger()));
         } else if (op.equals(PyTokenTypes.MULT)) {
-            setThis(left.toBigInteger().multiply(right.toBigInteger()));
+            setThis(left.getBigInteger().multiply(right.getBigInteger()));
         } else if (op.equals(PyTokenTypes.DIV)) {
             // TODO: FIX. This should be float division
             setThisUndefined();
             return;
         } else if (op.equals(PyTokenTypes.EXP)) {
-            setThis(left.toBigInteger().pow(right.toBigInteger().intValueExact()));
+            setThis(left.getBigInteger().pow(right.getBigInteger().intValueExact()));
         } else if (op.equals(PyTokenTypes.FLOORDIV)) {
-            setThis(left.toBigInteger().divide(right.toBigInteger()));
+            setThis(left.getBigInteger().divide(right.getBigInteger()));
         } else if (op.equals(PyTokenTypes.PERC)) {
-            setThis(left.toBigInteger().mod(right.toBigInteger()));
+            setThis(left.getBigInteger().mod(right.getBigInteger()));
         } else if (op.equals(PyTokenTypes.LTLT)) {
-            setThis(left.toBigInteger().shiftLeft(right.toBigInteger().intValueExact()));
+            setThis(left.getBigInteger().shiftLeft(right.getBigInteger().intValueExact()));
         } else if (op.equals(PyTokenTypes.GTGT)) {
-            setThis(left.toBigInteger().shiftRight(right.toBigInteger().intValueExact()));
+            setThis(left.getBigInteger().shiftRight(right.getBigInteger().intValueExact()));
         } else if (op.equals(PyTokenTypes.XOR)) {
-            setThis(left.toBigInteger().xor(right.toBigInteger()));
+            setThis(left.getBigInteger().xor(right.getBigInteger()));
         } else if (op.equals(PyTokenTypes.AND)) {
-            setThis(left.toBigInteger().and(right.toBigInteger()));
+            setThis(left.getBigInteger().and(right.getBigInteger()));
         } else if (op.equals(PyTokenTypes.OR)) {
-            setThis(left.toBigInteger().or(right.toBigInteger()));
+            setThis(left.getBigInteger().or(right.getBigInteger()));
         } else if (op.equals(PyTokenTypes.AND_KEYWORD)) {
-            setThis(left.toBoolean() ? right : left);
+            setThis(left.getBoolean() ? right : left);
         } else if (op.equals(PyTokenTypes.OR_KEYWORD)) {
-            setThis(left.toBoolean() ? left : right);
+            setThis(left.getBoolean() ? left : right);
         } else {
             setThisUndefined();
         }
@@ -127,7 +127,7 @@ public class PyConditionValue {
                 || op.equals(PyTokenTypes.GT) || op.equals(PyTokenTypes.GE)
                 || op.equals(PyTokenTypes.EQEQ) || op.equals(PyTokenTypes.NE) || op.equals(PyTokenTypes.NE_OLD)) {
             type = Type.BOOLEAN_AND_BIG_INTEGER;
-            value = right.toBigInteger();
+            value = right.getBigInteger();
         }
     }
 
@@ -163,7 +163,7 @@ public class PyConditionValue {
      * Undefined behaviour in case condition is not determined
      * @return boolean result for condition
      */
-    public boolean toBoolean() {
+    public boolean getBoolean() {
         return result;
     }
 
@@ -171,7 +171,7 @@ public class PyConditionValue {
      * Undefined behaviour in case condition is not determined
      * @return BigInteger result for condition
      */
-    public BigInteger toBigInteger() {
+    public BigInteger getBigInteger() {
         return value;
     }
 }

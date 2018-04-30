@@ -37,7 +37,7 @@ public class PyConstantExpression extends PyInspection {
             final PyExpression condition = pyIfPart.getCondition();
             PyConditionValue conditionValue = new PyConditionValue(condition);
             if (conditionValue.isDetermined()) {
-                registerProblem(condition, "The condition is always " + conditionValue.toBoolean());
+                registerProblem(condition, "The condition is always " + conditionValue.getBoolean());
             }
         }
     }
