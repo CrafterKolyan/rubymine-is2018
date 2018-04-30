@@ -48,11 +48,7 @@ public class PyConstantExpression extends PyInspection {
         private Result process(@NotNull PyExpression pyExpr){
             if (pyExpr instanceof PyBoolLiteralExpression) {
                 final boolean retValue = ((PyBoolLiteralExpression) pyExpr).getValue();
-                if (retValue) {
-                    return Result.TRUE;
-                } else {
-                    return Result.FALSE;
-                }
+                return retValue ? Result.TRUE : Result.FALSE;
             }
             return Result.UNDEFINED;
         }
