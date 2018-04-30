@@ -83,7 +83,7 @@ public class PyConstantExpression extends PyInspection {
             public PyConditionValue(BigInteger res) {
                 type = Type.BIG_INTEGER;
                 value = res;
-                result = value != BigInteger.ZERO;
+                result = !value.equals(BigInteger.ZERO);
             }
 
             public boolean isDetermined() { return type != Type.UNDEFINED; }
@@ -182,6 +182,7 @@ public class PyConstantExpression extends PyInspection {
                     if (r == 0) {
                         return new PyConditionValue(BigInteger.ONE);
                     } else if (r < 0) {
+                        registerProblem(pyExpr, "0 cannot be raised to a negative power (" + r + ")");
                         return new PyConditionValue();
                     }
                 }
@@ -189,24 +190,31 @@ public class PyConstantExpression extends PyInspection {
             } else if (op.equals(PyTokenTypes.FLOORDIV)) {
                 BigInteger divider = right.getBigInteger();
                 if (divider.equals(BigInteger.ZERO)) {
+                    registerProblem(pyExpr, "Division by 0");
                     return new PyConditionValue();
                 }
                 return new PyConditionValue(left.getBigInteger().divide(divider));
             } else if (op.equals(PyTokenTypes.PERC)) {
+                BigInteger divisor = left.getBigInteger();
                 BigInteger divider = right.getBigInteger();
                 if (divider.equals(BigInteger.ZERO)) {
+                    registerProblem(pyExpr, "Taking modulo by 0");
                     return new PyConditionValue();
+                } else if (divider.compareTo(BigInteger.ZERO) < 0) {
+                    return new PyConditionValue(divisor.negate().mod(divider.negate()).negate());
                 }
-                return new PyConditionValue(left.getBigInteger().mod(divider));
+                return new PyConditionValue(divisor.mod(divider));
             } else if (op.equals(PyTokenTypes.LTLT)) {
                 int shift = right.getBigInteger().intValueExact();
                 if (shift < 0) {
+                    registerProblem(pyExpr, "Shifting by negative number (" + shift + ")");
                     return new PyConditionValue();
                 }
                 return new PyConditionValue(left.getBigInteger().shiftLeft(shift));
             } else if (op.equals(PyTokenTypes.GTGT)) {
                 int shift = right.getBigInteger().intValueExact();
                 if (shift < 0) {
+                    registerProblem(pyExpr, "Shifting by negative number (" + shift + ")");
                     return new PyConditionValue();
                 }
                 return new PyConditionValue(left.getBigInteger().shiftRight(shift));
@@ -220,9 +228,9 @@ public class PyConstantExpression extends PyInspection {
                 return new PyConditionValue(left.getBoolean() ? right : left);
             } else if (op.equals(PyTokenTypes.OR_KEYWORD)) {
                 return new PyConditionValue(left.getBoolean() ? left : right);
-            } else {
-                return new PyConditionValue();
             }
+
+            return new PyConditionValue();
         }
 
         private PyConditionValue processParExpr(PyParenthesizedExpression pyExpr) {
