@@ -4,6 +4,10 @@ if -1 < 2 > 1:
     # true
     pass
 
+if 1 > 2 < 3:
+    # false
+    pass
+
 if -1 < 2 > 1 < 10 > -0 < 123 < 147 > 23 == 23 >= True == 1 <= 2 > False != 1 != 0:
     # true
     pass

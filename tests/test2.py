@@ -73,3 +73,7 @@ if 3 > 4 and 5 < 10:
 if not(3 > 4) and 5 < 10:
     # true
     pass
+
+if 0 == 0 and 0 != 1:
+    # true
+    pass
