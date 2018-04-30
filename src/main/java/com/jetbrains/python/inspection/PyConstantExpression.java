@@ -88,8 +88,16 @@ public class PyConstantExpression extends PyInspection {
 
             public boolean isDetermined() { return type != Type.UNDEFINED; }
 
+            /**
+             * Undefined behaviour when type == Type.UNDEFINED
+             * @return boolean result of condition expression
+             */
             public boolean getBoolean() { return result; }
 
+            /**
+             * Undefined behaviour when type == Type.UNDEFINED
+             * @return BigInteger result of condition expression
+             */
             public BigInteger getBigInteger() { return value; }
         }
 

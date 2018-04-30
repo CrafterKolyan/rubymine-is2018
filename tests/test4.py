@@ -9,8 +9,12 @@ if 1 > 2 < 3:
     pass
 
 a = 10
-if 4 > 5 < a:
+if 4 > 5 < a and a * a >= 0:
     # false
+    pass
+
+if a == False:
+
     pass
 
 if -1 < 2 > 1 < 10 > -0 < 123 < 147 > 23 == 23 >= True == 1 <= 2 > False != 1 != 0:
