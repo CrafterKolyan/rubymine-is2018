@@ -46,8 +46,8 @@ if 1 // 0 == 15 or -10 % (5 - 10 // 2) + 15 == 17:
     # Two warnings: 1. Division by 0, 2. Taking modulo by 0
     pass
 
-if -10 % 0:
-    # undefined behaviour. Here should be no RUNTIME
+if (3 or -10 % 0) < 5:
+    # true. Here should be no RUNTIME
     # Warning: Taking modulo by 0
     pass
 
