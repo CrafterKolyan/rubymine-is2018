@@ -58,6 +58,10 @@ if 2147483647 >= 322:
     # true
     pass
 
+if -False:
+    # false
+    pass
+
 if -False == 0:
     # true
     pass

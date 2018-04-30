@@ -12,6 +12,10 @@ if 1 > 2 < 3:
     # false
     pass
 
+if (4 < 5 > 3 and 5) == 5 and (4 > 5 < 3 and 5) == False:
+    # true
+    pass
+
 a = int(input())
 if 4 > 5 < a and a * a >= 0:
     # false
