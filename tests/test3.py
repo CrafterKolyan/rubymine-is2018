@@ -22,6 +22,10 @@ if (2 + 5) // 3 > 2:
     # false
     pass
 
+if -7 % 3 == 2:
+    # true
+    pass
+
 if 7 % 3 == 1:
     # true
     pass
