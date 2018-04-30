@@ -25,3 +25,23 @@ if (2 + 5) // 3 > 2:
 if 7 % 3 == 1:
     # true
     pass
+
+if (True ^ 0) == 1:
+    # true
+    pass
+
+if (-1 ^ True) == -2:
+    # true
+    pass
+
+if ~True == -2:
+    # true
+    pass
+
+if ~False == -1:
+    # true
+    pass
+
+if ~13847628374638628973456893465 == -13847628374638628973456893466:
+    # true
+    pass

@@ -53,3 +53,11 @@ if 228 != -2147483648:
 if 2147483647 >= 322:
     # true
     pass
+
+if -False == 0:
+    # true
+    pass
+
+if -True == -1:
+    # true
+    pass

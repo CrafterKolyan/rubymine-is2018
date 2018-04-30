@@ -57,3 +57,19 @@ if not((-1 < -2) or not(15 <= 13) and (1237512736 <= -12893618236)):
 if not(False):
     # true
     pass
+
+if (5 or 3) < 4:
+    # false
+    pass
+
+if (0 and -3) > -2:
+    # true
+    pass
+
+if 3 > 4 and 5 < 10:
+    # false
+    pass
+
+if not(3 > 4) and 5 < 10:
+    # true
+    pass
