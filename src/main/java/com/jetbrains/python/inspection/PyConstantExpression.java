@@ -35,18 +35,10 @@ public class PyConstantExpression extends PyInspection {
 
         private void processIfPart(@NotNull PyIfPart pyIfPart) {
             final PyExpression condition = pyIfPart.getCondition();
-            Boolean conditionValue = process(condition);
-            if (conditionValue != null) {
-                registerProblem(condition, "The condition is always " + conditionValue);
+            PyConditionValue conditionValue = new PyConditionValue(condition);
+            if (conditionValue.isDetermined()) {
+                registerProblem(condition, "The condition is always " + conditionValue.toBoolean());
             }
-        }
-
-        private Boolean process(@NotNull PyExpression pyExpr){
-            if (pyExpr instanceof PyBoolLiteralExpression) {
-                final boolean retValue = ((PyBoolLiteralExpression) pyExpr).getValue();
-                return retValue;
-            }
-            return null;
         }
     }
 }
