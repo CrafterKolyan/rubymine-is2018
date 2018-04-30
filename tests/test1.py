@@ -34,6 +34,10 @@ if 6 == -6:
     # false
     pass
 
+if -5 == 0:
+    # false
+    pass
+
 if 2147483647 <= 2147483647:
     # true
     pass

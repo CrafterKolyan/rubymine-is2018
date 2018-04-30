@@ -155,7 +155,8 @@ public class PyConstantExpression extends PyInspection {
                     return new PyConditionValue(left.getBoolean() ? right : left);
                 } else if (op.equals(PyTokenTypes.OR_KEYWORD)) {
                     return new PyConditionValue(left.getBoolean() ? left : right);
-                } else if (!left.getBoolean() && (op.equals(PyTokenTypes.LT) || op.equals(PyTokenTypes.LE)
+                } else if (left.type == PyConditionValue.Type.BOOLEAN_AND_BIG_INTEGER && !left.getBoolean()
+                        && (op.equals(PyTokenTypes.LT) || op.equals(PyTokenTypes.LE)
                         || op.equals(PyTokenTypes.GT) || op.equals(PyTokenTypes.GE)
                         || op.equals(PyTokenTypes.EQEQ) || op.equals(PyTokenTypes.NE) || op.equals(PyTokenTypes.NE_OLD))) {
                     return new PyConditionValue(false);
