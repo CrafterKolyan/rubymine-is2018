@@ -6,6 +6,14 @@ if False:
     # false
     pass
 
+if 5:
+    # true
+    pass
+
+if 0:
+    # false
+    pass
+
 if 1 < 2:
     # true
     pass
