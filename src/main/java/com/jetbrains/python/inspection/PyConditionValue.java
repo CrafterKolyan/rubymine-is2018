@@ -11,12 +11,17 @@ public class PyConditionValue {
         UNDEFINED,
         BOOLEAN,
         BIG_INTEGER
-    };
+    }
 
-    Type type;
-    Object value;
+    private Type type;
+    private Object value;
 
-    public PyConditionValue(PyExpression pyExpr) {
+    private void setThis(PyConditionValue pyCondValue) {
+        type = pyCondValue.type;
+        value = pyCondValue.value;
+    }
+
+    private void process(PyExpression pyExpr) {
         if (pyExpr instanceof PyBoolLiteralExpression) {
             value = ((PyBoolLiteralExpression) pyExpr).getValue();
             type = Type.BOOLEAN;
@@ -27,11 +32,18 @@ public class PyConditionValue {
             PyConditionValue operand = new PyConditionValue(((PyPrefixExpression) pyExpr).getOperand());
             PyElementType operator = ((PyPrefixExpression) pyExpr).getOperator();
 
-            type = Type.BIG_INTEGER;
             if (operator.equals(PyTokenTypes.PLUS)) {
+                type = Type.BIG_INTEGER;
                 value = operand.toBigInteger();
             } else if (operator.equals(PyTokenTypes.MINUS)) {
+                type = Type.BIG_INTEGER;
                 value = operand.toBigInteger().negate();
+            } else if (operator.equals(PyTokenTypes.NOT_KEYWORD)) {
+                type = Type.BOOLEAN;
+                value = !operand.toBoolean();
+            } else if (operator.equals(PyTokenTypes.TILDE)) {
+                type = Type.BIG_INTEGER;
+                value = operand.toBigInteger().negate().subtract(BigInteger.ONE);
             } else {
                 type = Type.UNDEFINED;
                 value = null;
@@ -65,14 +77,62 @@ public class PyConditionValue {
             } else if (op.equals(PyTokenTypes.NE) || op.equals(PyTokenTypes.NE_OLD)) {
                 type = Type.BOOLEAN;
                 value = left.toBigInteger().compareTo(right.toBigInteger()) != 0;
+            } else if (op.equals(PyTokenTypes.PLUS)) {
+                type = Type.BIG_INTEGER;
+                value = left.toBigInteger().add(right.toBigInteger());
+            } else if (op.equals(PyTokenTypes.MINUS)) {
+                type = Type.BIG_INTEGER;
+                value = left.toBigInteger().subtract(right.toBigInteger());
+            } else if (op.equals(PyTokenTypes.MULT)) {
+                type = Type.BIG_INTEGER;
+                value = left.toBigInteger().multiply(right.toBigInteger());
+            } else if (op.equals(PyTokenTypes.DIV)) {
+                // TODO: FIX. This should be float division
+                type = Type.UNDEFINED;
+                value = null;
+            } else if (op.equals(PyTokenTypes.EXP)) {
+                type = Type.BIG_INTEGER;
+                value = left.toBigInteger().pow(right.toBigInteger().intValueExact());
+            } else if (op.equals(PyTokenTypes.FLOORDIV)) {
+                type = Type.BIG_INTEGER;
+                value = left.toBigInteger().divide(right.toBigInteger());
+            } else if (op.equals(PyTokenTypes.PERC)) {
+                type = Type.BIG_INTEGER;
+                value = left.toBigInteger().mod(right.toBigInteger());
+            } else if (op.equals(PyTokenTypes.LTLT)) {
+                type = Type.BIG_INTEGER;
+                value = left.toBigInteger().shiftLeft(right.toBigInteger().intValueExact());
+            } else if (op.equals(PyTokenTypes.GTGT)) {
+                type = Type.BIG_INTEGER;
+                value = left.toBigInteger().shiftRight(right.toBigInteger().intValueExact());
+            } else if (op.equals(PyTokenTypes.AND_KEYWORD)) {
+                setThis(left.toBoolean() ? right : left);
+            } else if (op.equals(PyTokenTypes.OR_KEYWORD)) {
+                setThis(left.toBoolean() ? left : right);
+            } else if (op.equals(PyTokenTypes.XOR)) {
+                type = Type.BIG_INTEGER;
+                value = left.toBigInteger().xor(right.toBigInteger());
+            } else if (op.equals(PyTokenTypes.AND)) {
+                type = Type.BIG_INTEGER;
+                value = left.toBigInteger().and(right.toBigInteger());
+            } else if (op.equals(PyTokenTypes.OR)) {
+                type = Type.BIG_INTEGER;
+                value = left.toBigInteger().or(right.toBigInteger());
             } else {
                 type = Type.UNDEFINED;
                 value = null;
             }
+        } else if (pyExpr instanceof PyParenthesizedExpression) {
+            PyParenthesizedExpression pyParExpr = (PyParenthesizedExpression) pyExpr;
+            process(pyParExpr.getContainedExpression());
         } else {
             value = null;
             type = Type.UNDEFINED;
         }
+    }
+
+    public PyConditionValue(PyExpression pyExpr) {
+        process(pyExpr);
     }
 
     public boolean isDetermined() {
