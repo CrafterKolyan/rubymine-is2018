@@ -18,6 +18,10 @@ if (2 + 5) / 3 > 2:
     # true
     pass
 
+if (1 + 2) * 3 == 9:
+    # true
+    pass
+
 if (2 + 5) // 3 > 2:
     # false
     pass

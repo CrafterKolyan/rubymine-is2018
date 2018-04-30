@@ -45,7 +45,7 @@ public class PyConstantExpression extends PyInspection {
         }
 
         private static class PyConditionValue {
-            public enum Type {
+            enum Type {
                 UNDEFINED,
                 BOOLEAN,
                 BIG_INTEGER,
@@ -56,49 +56,49 @@ public class PyConstantExpression extends PyInspection {
             private boolean result;
             private BigInteger value;
 
-            public PyConditionValue(Type t, boolean res, BigInteger val) {
+            private PyConditionValue(Type t, boolean res, BigInteger val) {
                 type = t;
                 result = res;
                 value = val;
             }
 
-            public PyConditionValue() {
+            private PyConditionValue() {
                 type = Type.UNDEFINED;
                 result = false;
                 value = BigInteger.ZERO;
             }
 
-            public PyConditionValue(PyConditionValue pyCondValue) {
+            private PyConditionValue(PyConditionValue pyCondValue) {
                 type = pyCondValue.type;
                 result = pyCondValue.result;
                 value = pyCondValue.value;
             }
 
-            public PyConditionValue(boolean res) {
+            private PyConditionValue(boolean res) {
                 type = Type.BOOLEAN;
                 result = res;
                 value = result ? BigInteger.ONE : BigInteger.ZERO;
             }
 
-            public PyConditionValue(BigInteger res) {
+            private PyConditionValue(BigInteger res) {
                 type = Type.BIG_INTEGER;
                 value = res;
                 result = !value.equals(BigInteger.ZERO);
             }
 
-            public boolean isDetermined() { return type != Type.UNDEFINED; }
+            private boolean isDetermined() { return type != Type.UNDEFINED; }
 
             /**
              * Undefined behaviour when type == Type.UNDEFINED
              * @return boolean result of condition expression
              */
-            public boolean getBoolean() { return result; }
+            private boolean getBoolean() { return result; }
 
             /**
              * Undefined behaviour when type == Type.UNDEFINED
              * @return BigInteger result of condition expression
              */
-            public BigInteger getBigInteger() { return value; }
+            private BigInteger getBigInteger() { return value; }
         }
 
         private PyConditionValue process(PyExpression pyExpr) {
@@ -129,7 +129,7 @@ public class PyConstantExpression extends PyInspection {
             PyElementType operator = pyExpr.getOperator();
 
             if (!operand.isDetermined()) {
-                return operand;
+                return new PyConditionValue();
             }
 
             if (operator.equals(PyTokenTypes.PLUS)) {
@@ -155,7 +155,7 @@ public class PyConstantExpression extends PyInspection {
                     return new PyConditionValue(left.getBoolean() ? right : left);
                 } else if (op.equals(PyTokenTypes.OR_KEYWORD)) {
                     return new PyConditionValue(left.getBoolean() ? left : right);
-                } else if (left.getBoolean() == false && (op.equals(PyTokenTypes.LT) || op.equals(PyTokenTypes.LE)
+                } else if (!left.getBoolean() && (op.equals(PyTokenTypes.LT) || op.equals(PyTokenTypes.LE)
                         || op.equals(PyTokenTypes.GT) || op.equals(PyTokenTypes.GE)
                         || op.equals(PyTokenTypes.EQEQ) || op.equals(PyTokenTypes.NE) || op.equals(PyTokenTypes.NE_OLD))) {
                     return new PyConditionValue(false);

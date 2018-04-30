@@ -1,5 +1,9 @@
 # Unobvious tests
 
+if +5 == 5:
+    # true
+    pass
+
 if -1 < 2 > 1:
     # true
     pass
@@ -13,8 +17,8 @@ if 4 > 5 < a and a * a >= 0:
     # false
     pass
 
-if +a == 0:
-
+if -a == 0:
+    # undefined
     pass
 
 if a == 0 and a == 1 or a == 0:
