@@ -20,6 +20,8 @@ public class PyConstantExpression extends PyInspection {
 
     private static class Visitor extends PyInspectionVisitor {
 
+        enum Result { UNDEFINED, FALSE, TRUE }
+
         private Visitor(@Nullable ProblemsHolder holder, @NotNull LocalInspectionToolSession session) {
             super(holder, session);
         }
@@ -35,9 +37,24 @@ public class PyConstantExpression extends PyInspection {
 
         private void processIfPart(@NotNull PyIfPart pyIfPart) {
             final PyExpression condition = pyIfPart.getCondition();
-            if (condition instanceof PyBoolLiteralExpression) {
-                registerProblem(condition, "The condition is always " + ((PyBoolLiteralExpression) condition).getValue());
+            Result conditionValue = process(condition);
+            if (conditionValue == Result.TRUE) {
+                registerProblem(condition, "The condition is always " + "true");
+            } else if (conditionValue == Result.FALSE) {
+                registerProblem(condition, "The condition is always " + "false");
             }
+        }
+
+        private Result process(@NotNull PyExpression pyExpr){
+            if (pyExpr instanceof PyBoolLiteralExpression) {
+                final boolean retValue = ((PyBoolLiteralExpression) pyExpr).getValue();
+                if (retValue) {
+                    return Result.TRUE;
+                } else {
+                    return Result.FALSE;
+                }
+            }
+            return Result.UNDEFINED;
         }
     }
 }
