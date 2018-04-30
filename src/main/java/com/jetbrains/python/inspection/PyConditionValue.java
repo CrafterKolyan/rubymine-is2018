@@ -1,6 +1,5 @@
 package com.jetbrains.python.inspection;
 
-import com.intellij.icons.AllIcons;
 import com.jetbrains.python.PyTokenTypes;
 import com.jetbrains.python.psi.*;
 
@@ -24,7 +23,7 @@ public class PyConditionValue {
         } else if (pyExpr instanceof PyNumericLiteralExpression) {
             value = ((PyNumericLiteralExpression) pyExpr).getBigIntegerValue();
             type = Type.BIG_INTEGER;
-        } else if (pyExpr instanceof  PyPrefixExpression) {
+        } else if (pyExpr instanceof PyPrefixExpression) {
             PyConditionValue operand = new PyConditionValue(((PyPrefixExpression) pyExpr).getOperand());
             PyElementType operator = ((PyPrefixExpression) pyExpr).getOperator();
 
@@ -33,11 +32,20 @@ public class PyConditionValue {
                 value = operand.toBigInteger();
             } else if (operator.equals(PyTokenTypes.MINUS)) {
                 value = operand.toBigInteger().negate();
+            } else {
+                type = Type.UNDEFINED;
+                value = null;
             }
         } else if (pyExpr instanceof PyBinaryExpression) {
             PyConditionValue left = new PyConditionValue(((PyBinaryExpression) pyExpr).getLeftExpression());
             PyConditionValue right = new PyConditionValue(((PyBinaryExpression) pyExpr).getRightExpression());
             PyElementType op = ((PyBinaryExpression) pyExpr).getOperator();
+
+            if (!left.isDetermined() || !right.isDetermined()) {
+                type = Type.UNDEFINED;
+                value = null;
+                return;
+            }
 
             if (op.equals(PyTokenTypes.LT)) {
                 type = Type.BOOLEAN;
@@ -57,6 +65,9 @@ public class PyConditionValue {
             } else if (op.equals(PyTokenTypes.NE) || op.equals(PyTokenTypes.NE_OLD)) {
                 type = Type.BOOLEAN;
                 value = left.toBigInteger().compareTo(right.toBigInteger()) != 0;
+            } else {
+                type = Type.UNDEFINED;
+                value = null;
             }
         } else {
             value = null;
@@ -79,8 +90,11 @@ public class PyConditionValue {
     }
 
     public BigInteger toBigInteger() {
-        if (type == Type.BIG_INTEGER) {
-            return (BigInteger) value;
+        switch (type) {
+            case BOOLEAN:
+                return ((boolean) value) ? BigInteger.ONE : BigInteger.ZERO;
+            case BIG_INTEGER:
+                return (BigInteger) value;
         }
         return null;
     }
