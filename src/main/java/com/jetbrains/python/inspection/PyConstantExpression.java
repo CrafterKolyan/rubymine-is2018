@@ -128,6 +128,10 @@ public class PyConstantExpression extends PyInspection {
             PyConditionValue operand = process(pyExpr.getOperand());
             PyElementType operator = pyExpr.getOperator();
 
+            if (!operand.isDetermined()) {
+                return operand;
+            }
+
             if (operator.equals(PyTokenTypes.PLUS)) {
                 return new PyConditionValue(operand.getBigInteger());
             } else if (operator.equals(PyTokenTypes.MINUS)) {

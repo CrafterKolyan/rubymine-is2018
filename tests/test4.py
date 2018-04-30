@@ -8,13 +8,17 @@ if 1 > 2 < 3:
     # false
     pass
 
-a = 10
+a = int(input())
 if 4 > 5 < a and a * a >= 0:
     # false
     pass
 
-if a == False:
+if +a == 0:
 
+    pass
+
+if a == 0 and a == 1 or a == 0:
+    # undefined
     pass
 
 if -1 < 2 > 1 < 10 > -0 < 123 < 147 > 23 == 23 >= True == 1 <= 2 > False != 1 != 0:
