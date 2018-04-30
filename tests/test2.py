@@ -1,5 +1,59 @@
-if True:
+if not True:
+    # false
     pass
 
-if False:
+if not False:
+    # true
+    pass
+
+if True and True:
+    # true
+    pass
+
+if True and False:
+    # false
+    pass
+
+if False and True:
+    # false
+    pass
+
+if False and False:
+    # false
+    pass
+
+if True or True:
+    # true
+    pass
+
+if True or False:
+    # true
+    pass
+
+if False or True:
+    # true
+    pass
+
+if False or False:
+    # false
+    pass
+
+if 10 < 20 and 5 > 3:
+    # true
+    pass
+
+if 10 < 20 or 5 <= 3:
+    # true
+    pass
+
+if False or True and False:
+    # false
+    pass
+
+if not((-1 < -2) or not(15 <= 13) and (1237512736 <= -12893618236)):
+    # true
+    pass
+
+if not(False):
+    # true
     pass
