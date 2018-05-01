@@ -64,14 +64,11 @@ public class PyValue {
 
     public Object getValue() { return value; }
 
-    public String getTypeString() {
-        switch (type) {
-            case BIG_INTEGER: return "integer";
-            case BIG_DECIMAL: return "float";
-            case UNDEFINED: return "undefined";
-            case OBJECT: return "object";
+    public BigInteger getBigInteger() {
+        if (!isInteger()) {
+            return BigInteger.ZERO;
         }
-        return type.toString();
+        return (BigInteger) value;
     }
 
     public BigDecimal getBigDecimal() {
@@ -83,17 +80,27 @@ public class PyValue {
         return (BigDecimal) value;
     }
 
+    public String getTypeString() {
+        switch (type) {
+            case BIG_INTEGER: return "integer";
+            case BIG_DECIMAL: return "float";
+            case UNDEFINED: return "undefined";
+            case OBJECT: return "object";
+        }
+        return type.toString();
+    }
+
+    @Override
+    public String toString() {
+        return value.toString();
+    }
+
     @Override
     public boolean equals(Object another) {
         if (!(another instanceof PyValue))
             return false;
         PyValue other = (PyValue)another;
-        if (!isNumber() || !other.isNumber()) {
-            return value.equals(other.value);
-        } else if (type == Type.BIG_INTEGER && other.type == Type.BIG_INTEGER) {
-            return ((BigInteger)value).equals((BigInteger)other.value);
-        }
-        return getBigDecimal().equals(other.getBigDecimal());
+        return value.equals(other.value);
     }
 
     public int compareTo(PyValue other) {

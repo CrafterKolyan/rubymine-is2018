@@ -20,7 +20,7 @@ if 1.0 + 0.5 < -1.6:
     # false
     pass
 
-if 0.0 == 0:
+if 0.0 == 0 and 0 == -0.0:
     # true
     pass
 
