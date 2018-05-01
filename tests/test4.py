@@ -70,6 +70,14 @@ if -5 % -3 == 2:
     # false
     pass
 
+if -5 // 4 == -2:
+    # true
+    pass
+
+if 5 // -4 == -2:
+    # true
+    pass
+
 if 1 // 0 == 15 or -10 % (5 - 10 // 2) + 15 == 17:
     # undefined behaviour. Here should be no RUNTIME
     # Two warnings: 1. Division by 0, 2. Taking modulo by 0
