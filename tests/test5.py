@@ -33,6 +33,14 @@ if a < -228 and a > -228:
     # false
     pass
 
+if a <= 322 or a > 322:
+    # true
+    pass
+
 if a > 0 and a < 1:
+    # undefined
+    pass
+
+if (a or True) == 1:
     # undefined
     pass

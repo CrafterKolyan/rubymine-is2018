@@ -98,6 +98,10 @@ if 78462 <= 2.5 ** 12.3 <= 78463:
     # Need extra libraries to support BigDecimal ** BigDecimal
     pass
 
+if -1e81 < -4.5 ** 123 < -1e80:
+    # true
+    pass
+
 if -2 - 1e-6 < -5.0 // 4.0 < -2 + 1e-6:
     # true
     pass
