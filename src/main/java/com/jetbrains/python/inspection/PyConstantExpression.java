@@ -99,7 +99,7 @@ public class PyConstantExpression extends PyInspection {
                 } else {
                     type = Type.VALUE;
                     value = res;
-                    result = !value.equals(null);
+                    result = res.getValue() != null;
                 }
             }
 
