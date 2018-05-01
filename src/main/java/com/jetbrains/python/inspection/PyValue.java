@@ -173,9 +173,17 @@ public class PyValue {
 
     public PyValue mod(PyValue other) {
         if (type == Type.BIG_INTEGER && other.type == Type.BIG_INTEGER) {
+            if (other.compareTo(PyValue.ZERO) < 0) {
+                return negate().mod(other.negate()).negate();
+            }
             return new PyValue(((BigInteger) value).mod((BigInteger) other.value));
         } else if (isNumber() && other.isNumber()) {
-            return new PyValue(getBigDecimal().divideAndRemainder(other.getBigDecimal())[1]);
+            BigDecimal divisor = getBigDecimal();
+            BigDecimal divider = other.getBigDecimal();
+            if (divisor.compareTo(BigDecimal.ZERO) * divider.compareTo(BigDecimal.ZERO) < 0) {
+                return new PyValue(divisor.divideAndRemainder(divider)[1].add(divider));
+            }
+            return new PyValue(divisor.divideAndRemainder(divider)[1]);
         }
         return new PyValue();
     }

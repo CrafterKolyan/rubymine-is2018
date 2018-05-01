@@ -263,8 +263,6 @@ public class PyConstantExpression extends PyInspection {
                 if (divider.equals(PyValue.ZERO)) {
                     registerProblem(pyExpr, "Taking modulo by 0");
                     return new PyConditionValue();
-                } else if (divider.compareTo(PyValue.ZERO) < 0) {
-                    return new PyConditionValue(divisor.negate().mod(divider.negate()).negate());
                 }
                 return new PyConditionValue(divisor.mod(divider));
             } else if (op.equals(PyTokenTypes.LTLT)) {
