@@ -184,7 +184,7 @@ public class PyConstantExpression extends PyInspection {
                 }
             }
 
-            if (!left.isDetermined() || !right.isDetermined()) {
+            if (!left.isDetermined() || !right.isDetermined() || !left.getValue().isNumber() || !right.getValue().isNumber()) {
                 return new PyConditionValue();
             }
 
@@ -235,21 +235,24 @@ public class PyConstantExpression extends PyInspection {
                     return new PyConditionValue();
                 }
                 return new PyConditionValue(left.getValue().divide(divider));
-            }/* else if (op.equals(PyTokenTypes.EXP)) {
-                BigInteger l = left.getValue();
-                int r = right.getValue().intValueExact();
-                if (l.equals(BigInteger.ZERO)) {
-                    if (r == 0) {
-                        return new PyConditionValue(BigInteger.ONE);
-                    } else if (r < 0) {
+            } else if (op.equals(PyTokenTypes.EXP)) {
+                PyValue l = left.getValue();
+                PyValue r = right.getValue();
+                if (l.equals(PyValue.ZERO)) {
+                    if (r.equals(PyValue.ZERO)) {
+                        return new PyConditionValue(PyValue.ONE);
+                    } else if (r.compareTo(PyValue.ZERO) < 0) {
                         registerProblem(pyExpr, "0 cannot be raised to a negative power (" + r + ")");
                         return new PyConditionValue();
                     }
                 }
-                return new PyConditionValue(left.getValue().pow(right.getValue().intValueExact()));
-            }*/ else if (op.equals(PyTokenTypes.FLOORDIV)) {
+                if (!r.isInteger()) {
+                    return new PyConditionValue();
+                }
+                return new PyConditionValue(left.getValue().pow(right.getValue()));
+            } else if (op.equals(PyTokenTypes.FLOORDIV)) {
                 PyValue divider = right.getValue();
-                if (divider.equals(BigInteger.ZERO)) {
+                if (divider.equals(PyValue.ZERO)) {
                     registerProblem(pyExpr, "Division by 0");
                     return new PyConditionValue();
                 }

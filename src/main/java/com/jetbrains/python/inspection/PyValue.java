@@ -173,6 +173,15 @@ public class PyValue {
         return new PyValue();
     }
 
+    public PyValue pow(PyValue other) {
+        if (type == Type.BIG_INTEGER && other.type == Type.BIG_INTEGER) {
+            return new PyValue(((BigInteger) value).pow(((BigInteger) other.value).intValueExact()));
+        } else if (type == Type.BIG_DECIMAL && other.type == Type.BIG_INTEGER) {
+            return new PyValue(getBigDecimal().pow(((BigInteger) other.value).intValueExact()));
+        }
+        return new PyValue();
+    }
+
     public PyValue shiftLeft(PyValue other) {
         if (type == Type.BIG_INTEGER && other.type == Type.BIG_INTEGER) {
             return new PyValue(((BigInteger) value).shiftLeft(((BigInteger) other.value).intValueExact()));
