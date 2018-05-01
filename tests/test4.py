@@ -70,11 +70,11 @@ if -5 % -3 == 2:
     # false
     pass
 
-if -5 // 4 == -2:
+if -3 // 4 == -1:
     # true
     pass
 
-if 5 // -4 == -2:
+if 3 // -4 == -1:
     # true
     pass
 

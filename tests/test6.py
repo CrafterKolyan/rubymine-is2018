@@ -40,11 +40,11 @@ if 7.5 // 1.8 == 4.0:
     # true
     pass
 
-if -7.5 // 1.8 == -4.0:
+if -7.5 // 1.8 == -5.0:
     # true
     pass
 
-if 7.5 // -1.8 == -4.0:
+if 7.5 // -1.8 == -5.0:
     # true
     pass
 
@@ -96,4 +96,20 @@ if 78462 <= 2.5 ** 12.3 <= 78463:
     # true
     # Won't work. BigDecimal can be powered only to Integer power.
     # Need extra libraries to support BigDecimal ** BigDecimal
+    pass
+
+if -2 - 1e-6 < -5.0 // 4.0 < -2 + 1e-6:
+    # true
+    pass
+
+if -2 - 1e-6 < 5.0 // -4.0 < -2 + 1e-6:
+    # true
+    pass
+
+if 1 - 1e-6 < 5.0 // 4.0 < 1 + 1e-6:
+    # true
+    pass
+
+if 1 - 1e-6 < -5.0 // -4.0 < 1 + 1e-6:
+    # true
     pass

@@ -162,9 +162,25 @@ public class PyValue {
 
     PyValue floordivide(PyValue other) {
         if (isInteger() && other.isInteger()) {
-            return new PyValue(((BigInteger) value).divide((BigInteger) other.value));
+            BigInteger left = getBigInteger();
+            BigInteger right = other.getBigInteger();
+            BigInteger []res = left.divideAndRemainder(right);
+            if (left.compareTo(BigInteger.ZERO) * right.compareTo(BigInteger.ZERO) < 0) {
+                if (!res[1].equals(BigInteger.ZERO)) {
+                    res[0] = res[0].subtract(BigInteger.ONE);
+                }
+            }
+            return new PyValue(res[0]);
         } else if (isNumber() && other.isNumber()) {
-            return new PyValue(getBigDecimal().divideAndRemainder(other.getBigDecimal())[0]);
+            BigDecimal left = getBigDecimal();
+            BigDecimal right = other.getBigDecimal();
+            BigDecimal []res = left.divideAndRemainder(right);
+            if (left.compareTo(BigDecimal.ZERO) * right.compareTo(BigDecimal.ZERO) < 0) {
+                if (!res[1].equals(BigDecimal.ZERO)) {
+                    res[0] = res[0].subtract(BigDecimal.ONE);
+                }
+            }
+            return new PyValue(res[0]);
         }
         return new PyValue();
     }
