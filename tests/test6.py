@@ -71,3 +71,29 @@ if -7.5 % -1.8 < -0.3 + 1e-6 and -7.5 % -1.8 > -0.3 - 1e-6:
 if 1 % (1 / 3) < 1e-6 and 1 % (1 / 3) > -1e-6:
     # true
     pass
+
+if 7.5 % 1.8 < -0.3 + 1e-6 and 7.5 % 1.8 > -0.3 - 1e-6:
+    # false
+    pass
+
+if 1 + 18 % 2.3 < 0:
+    # false
+    pass
+
+if 10 & 12.3:
+    # undefined. no RUNTIME here
+    pass
+
+if 13.3 ^ 12.3:
+    # undefined. no RUNTIME here
+    pass
+
+if 10 | 12.3:
+    # undefined. no RUNTIME here
+    pass
+
+if 78462 <= 2.5 ** 12.3 <= 78463:
+    # true
+    # Won't work. BigDecimal can be powered only to Integer power.
+    # Need extra libraries to support BigDecimal ** BigDecimal
+    pass
