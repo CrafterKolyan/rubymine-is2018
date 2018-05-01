@@ -10,6 +10,7 @@ import com.jetbrains.python.psi.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 public class PyConstantExpression extends PyInspection {
@@ -48,15 +49,15 @@ public class PyConstantExpression extends PyInspection {
             enum Type {
                 UNDEFINED,
                 BOOLEAN,
-                BIG_INTEGER,
-                BOOLEAN_AND_BIG_INTEGER
+                VALUE,
+                BOOLEAN_AND_VALUE
             }
 
             private Type type;
             private boolean result;
-            private BigInteger value;
+            private PyValue value;
 
-            private PyConditionValue(Type t, boolean res, BigInteger val) {
+            private PyConditionValue(Type t, boolean res, PyValue val) {
                 type = t;
                 result = res;
                 value = val;
@@ -65,25 +66,41 @@ public class PyConstantExpression extends PyInspection {
             private PyConditionValue() {
                 type = Type.UNDEFINED;
                 result = false;
-                value = BigInteger.ZERO;
-            }
-
-            private PyConditionValue(PyConditionValue pyCondValue) {
-                type = pyCondValue.type;
-                result = pyCondValue.result;
-                value = pyCondValue.value;
+                value = new PyValue();
             }
 
             private PyConditionValue(boolean res) {
                 type = Type.BOOLEAN;
                 result = res;
-                value = result ? BigInteger.ONE : BigInteger.ZERO;
+                value = new PyValue(result ? BigInteger.ONE : BigInteger.ZERO);
             }
 
             private PyConditionValue(BigInteger res) {
-                type = Type.BIG_INTEGER;
-                value = res;
-                result = !value.equals(BigInteger.ZERO);
+                type = Type.VALUE;
+                value = new PyValue(res);
+                result = value.compareTo(new PyValue(BigInteger.ZERO)) != 0;
+            }
+
+            private PyConditionValue(BigDecimal res) {
+                type = Type.VALUE;
+                value = new PyValue(res);
+                result = value.compareTo(new PyValue(BigDecimal.ZERO)) != 0;
+            }
+
+            private PyConditionValue(PyValue res) {
+                if (!res.isDetermined()) {
+                    type = Type.UNDEFINED;
+                    result = false;
+                    value = res;
+                } else if (res.isNumber()) {
+                    type = Type.VALUE;
+                    value = res;
+                    result = value.compareTo(new PyValue(value.isInteger() ? BigInteger.ZERO : BigDecimal.ZERO)) != 0;
+                } else {
+                    type = Type.VALUE;
+                    value = res;
+                    result = !value.equals(null);
+                }
             }
 
             private boolean isDetermined() { return type != Type.UNDEFINED; }
@@ -98,7 +115,7 @@ public class PyConstantExpression extends PyInspection {
              * Undefined behaviour when type == Type.UNDEFINED
              * @return BigInteger result of condition expression
              */
-            private BigInteger getBigInteger() { return value; }
+            private PyValue getValue() { return value; }
         }
 
         private PyConditionValue process(PyExpression pyExpr) {
@@ -121,7 +138,11 @@ public class PyConstantExpression extends PyInspection {
         }
 
         private PyConditionValue processNumLiteral(PyNumericLiteralExpression pyExpr) {
-            return new PyConditionValue(pyExpr.getBigIntegerValue());
+            if (pyExpr.isIntegerLiteral()) {
+               return new PyConditionValue(pyExpr.getBigIntegerValue());
+            } else {
+                return new PyConditionValue(pyExpr.getBigDecimalValue());
+            }
         }
 
         private PyConditionValue processPrefExpr(PyPrefixExpression pyExpr) {
@@ -133,14 +154,14 @@ public class PyConstantExpression extends PyInspection {
             }
 
             if (operator.equals(PyTokenTypes.PLUS)) {
-                return new PyConditionValue(operand.getBigInteger());
+                return new PyConditionValue(operand.getValue());
             } else if (operator.equals(PyTokenTypes.MINUS)) {
-                return new PyConditionValue(operand.getBigInteger().negate());
+                return new PyConditionValue(operand.getValue().negate());
             } else if (operator.equals(PyTokenTypes.NOT_KEYWORD)) {
                 return new PyConditionValue(!operand.getBoolean());
-            } else if (operator.equals(PyTokenTypes.TILDE)) {
-                return new PyConditionValue(operand.getBigInteger().negate().subtract(BigInteger.ONE));
-            } else {
+            }/* else if (operator.equals(PyTokenTypes.TILDE)) {
+                return new PyConditionValue(operand.getValue().negate().subtract(BigInteger.ONE));
+            }*/ else {
                 return new PyConditionValue();
             }
         }
@@ -152,10 +173,10 @@ public class PyConstantExpression extends PyInspection {
 
             if (left.isDetermined()) {
                 if (op.equals(PyTokenTypes.AND_KEYWORD)) {
-                    return new PyConditionValue(left.getBoolean() ? right : left);
+                    return left.getBoolean() ? right : left;
                 } else if (op.equals(PyTokenTypes.OR_KEYWORD)) {
-                    return new PyConditionValue(left.getBoolean() ? left : right);
-                } else if (left.type == PyConditionValue.Type.BOOLEAN_AND_BIG_INTEGER && !left.getBoolean()
+                    return left.getBoolean() ? left : right;
+                } else if (left.type == PyConditionValue.Type.BOOLEAN_AND_VALUE && !left.getBoolean()
                         && (op.equals(PyTokenTypes.LT) || op.equals(PyTokenTypes.LE)
                         || op.equals(PyTokenTypes.GT) || op.equals(PyTokenTypes.GE)
                         || op.equals(PyTokenTypes.EQEQ) || op.equals(PyTokenTypes.NE) || op.equals(PyTokenTypes.NE_OLD))) {
@@ -168,41 +189,41 @@ public class PyConstantExpression extends PyInspection {
             }
 
             if (op.equals(PyTokenTypes.LT)) {
-                return new PyConditionValue(PyConditionValue.Type.BOOLEAN_AND_BIG_INTEGER,
-                        left.getBigInteger().compareTo(right.getBigInteger()) < 0,
-                        right.getBigInteger());
+                return new PyConditionValue(PyConditionValue.Type.BOOLEAN_AND_VALUE,
+                        left.getValue().compareTo(right.getValue()) < 0,
+                        right.getValue());
             } else if (op.equals(PyTokenTypes.LE)) {
-                return new PyConditionValue(PyConditionValue.Type.BOOLEAN_AND_BIG_INTEGER,
-                        left.getBigInteger().compareTo(right.getBigInteger()) <= 0,
-                        right.getBigInteger());
+                return new PyConditionValue(PyConditionValue.Type.BOOLEAN_AND_VALUE,
+                        left.getValue().compareTo(right.getValue()) <= 0,
+                        right.getValue());
             } else if (op.equals(PyTokenTypes.GT)) {
-                return new PyConditionValue(PyConditionValue.Type.BOOLEAN_AND_BIG_INTEGER,
-                        left.getBigInteger().compareTo(right.getBigInteger()) > 0,
-                        right.getBigInteger());
+                return new PyConditionValue(PyConditionValue.Type.BOOLEAN_AND_VALUE,
+                        left.getValue().compareTo(right.getValue()) > 0,
+                        right.getValue());
             } else if (op.equals(PyTokenTypes.GE)) {
-                return new PyConditionValue(PyConditionValue.Type.BOOLEAN_AND_BIG_INTEGER,
-                        left.getBigInteger().compareTo(right.getBigInteger()) >= 0,
-                        right.getBigInteger());
+                return new PyConditionValue(PyConditionValue.Type.BOOLEAN_AND_VALUE,
+                        left.getValue().compareTo(right.getValue()) >= 0,
+                        right.getValue());
             } else if (op.equals(PyTokenTypes.EQEQ)) {
-                return new PyConditionValue(PyConditionValue.Type.BOOLEAN_AND_BIG_INTEGER,
-                        left.getBigInteger().compareTo(right.getBigInteger()) == 0,
-                        right.getBigInteger());
+                return new PyConditionValue(PyConditionValue.Type.BOOLEAN_AND_VALUE,
+                        left.getValue().compareTo(right.getValue()) == 0,
+                        right.getValue());
             } else if (op.equals(PyTokenTypes.NE) || op.equals(PyTokenTypes.NE_OLD)) {
-                return new PyConditionValue(PyConditionValue.Type.BOOLEAN_AND_BIG_INTEGER,
-                        left.getBigInteger().compareTo(right.getBigInteger()) != 0,
-                        right.getBigInteger());
+                return new PyConditionValue(PyConditionValue.Type.BOOLEAN_AND_VALUE,
+                        left.getValue().compareTo(right.getValue()) != 0,
+                        right.getValue());
             } else if (op.equals(PyTokenTypes.PLUS)) {
-                return new PyConditionValue(left.getBigInteger().add(right.getBigInteger()));
-            } else if (op.equals(PyTokenTypes.MINUS)) {
-                return new PyConditionValue(left.getBigInteger().subtract(right.getBigInteger()));
+                return new PyConditionValue(left.getValue().add(right.getValue()));
+            }/* else if (op.equals(PyTokenTypes.MINUS)) {
+                return new PyConditionValue(left.getValue().subtract(right.getValue()));
             } else if (op.equals(PyTokenTypes.MULT)) {
-                return new PyConditionValue(left.getBigInteger().multiply(right.getBigInteger()));
+                return new PyConditionValue(left.getValue().multiply(right.getValue()));
             } else if (op.equals(PyTokenTypes.DIV)) {
                 // TODO: FIX. This should be float division
                 return new PyConditionValue();
             } else if (op.equals(PyTokenTypes.EXP)) {
-                BigInteger l = left.getBigInteger();
-                int r = right.getBigInteger().intValueExact();
+                BigInteger l = left.getValue();
+                int r = right.getValue().intValueExact();
                 if (l.equals(BigInteger.ZERO)) {
                     if (r == 0) {
                         return new PyConditionValue(BigInteger.ONE);
@@ -211,17 +232,17 @@ public class PyConstantExpression extends PyInspection {
                         return new PyConditionValue();
                     }
                 }
-                return new PyConditionValue(left.getBigInteger().pow(right.getBigInteger().intValueExact()));
+                return new PyConditionValue(left.getValue().pow(right.getValue().intValueExact()));
             } else if (op.equals(PyTokenTypes.FLOORDIV)) {
-                BigInteger divider = right.getBigInteger();
+                BigInteger divider = right.getValue();
                 if (divider.equals(BigInteger.ZERO)) {
                     registerProblem(pyExpr, "Division by 0");
                     return new PyConditionValue();
                 }
-                return new PyConditionValue(left.getBigInteger().divide(divider));
+                return new PyConditionValue(left.getValue().divide(divider));
             } else if (op.equals(PyTokenTypes.PERC)) {
-                BigInteger divisor = left.getBigInteger();
-                BigInteger divider = right.getBigInteger();
+                BigInteger divisor = left.getValue();
+                BigInteger divider = right.getValue();
                 if (divider.equals(BigInteger.ZERO)) {
                     registerProblem(pyExpr, "Taking modulo by 0");
                     return new PyConditionValue();
@@ -230,27 +251,27 @@ public class PyConstantExpression extends PyInspection {
                 }
                 return new PyConditionValue(divisor.mod(divider));
             } else if (op.equals(PyTokenTypes.LTLT)) {
-                int shift = right.getBigInteger().intValueExact();
+                int shift = right.getValue().intValueExact();
                 if (shift < 0) {
                     registerProblem(pyExpr, "Shifting by negative number (" + shift + ")");
                     return new PyConditionValue();
                 }
-                return new PyConditionValue(left.getBigInteger().shiftLeft(shift));
+                return new PyConditionValue(left.getValue().shiftLeft(shift));
             } else if (op.equals(PyTokenTypes.GTGT)) {
-                int shift = right.getBigInteger().intValueExact();
+                int shift = right.getValue().intValueExact();
                 if (shift < 0) {
                     registerProblem(pyExpr, "Shifting by negative number (" + shift + ")");
                     return new PyConditionValue();
                 }
-                return new PyConditionValue(left.getBigInteger().shiftRight(shift));
+                return new PyConditionValue(left.getValue().shiftRight(shift));
             } else if (op.equals(PyTokenTypes.XOR)) {
-                return new PyConditionValue(left.getBigInteger().xor(right.getBigInteger()));
+                return new PyConditionValue(left.getValue().xor(right.getValue()));
             } else if (op.equals(PyTokenTypes.AND)) {
-                return new PyConditionValue(left.getBigInteger().and(right.getBigInteger()));
+                return new PyConditionValue(left.getValue().and(right.getValue()));
             } else if (op.equals(PyTokenTypes.OR)) {
-                return new PyConditionValue(left.getBigInteger().or(right.getBigInteger()));
+                return new PyConditionValue(left.getValue().or(right.getValue()));
             }
-
+*/
             return new PyConditionValue();
         }
 
