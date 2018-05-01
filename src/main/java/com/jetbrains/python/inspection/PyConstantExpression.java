@@ -72,19 +72,19 @@ public class PyConstantExpression extends PyInspection {
             private PyConditionValue(boolean res) {
                 type = Type.BOOLEAN;
                 result = res;
-                value = new PyValue(result ? BigInteger.ONE : BigInteger.ZERO);
+                value = result ? PyValue.ONE : PyValue.ZERO;
             }
 
             private PyConditionValue(BigInteger res) {
                 type = Type.VALUE;
                 value = new PyValue(res);
-                result = value.compareTo(new PyValue(BigInteger.ZERO)) != 0;
+                result = value.compareTo(PyValue.ZERO) != 0;
             }
 
             private PyConditionValue(BigDecimal res) {
                 type = Type.VALUE;
                 value = new PyValue(res);
-                result = value.compareTo(new PyValue(BigDecimal.ZERO)) != 0;
+                result = value.compareTo(PyValue.ZERO) != 0;
             }
 
             private PyConditionValue(PyValue res) {
@@ -95,7 +95,7 @@ public class PyConstantExpression extends PyInspection {
                 } else if (res.isNumber()) {
                     type = Type.VALUE;
                     value = res;
-                    result = value.compareTo(new PyValue(value.isInteger() ? BigInteger.ZERO : BigDecimal.ZERO)) != 0;
+                    result = !value.equals(PyValue.ZERO);
                 } else {
                     type = Type.VALUE;
                     value = res;
@@ -159,9 +159,9 @@ public class PyConstantExpression extends PyInspection {
                 return new PyConditionValue(operand.getValue().negate());
             } else if (operator.equals(PyTokenTypes.NOT_KEYWORD)) {
                 return new PyConditionValue(!operand.getBoolean());
-            }/* else if (operator.equals(PyTokenTypes.TILDE)) {
-                return new PyConditionValue(operand.getValue().negate().subtract(BigInteger.ONE));
-            }*/ else {
+            } else if (operator.equals(PyTokenTypes.TILDE)) {
+                return new PyConditionValue(operand.getValue().negate().subtract(PyValue.ONE));
+            } else {
                 return new PyConditionValue();
             }
         }
@@ -214,9 +214,9 @@ public class PyConstantExpression extends PyInspection {
                         right.getValue());
             } else if (op.equals(PyTokenTypes.PLUS)) {
                 return new PyConditionValue(left.getValue().add(right.getValue()));
-            }/* else if (op.equals(PyTokenTypes.MINUS)) {
+            } else if (op.equals(PyTokenTypes.MINUS)) {
                 return new PyConditionValue(left.getValue().subtract(right.getValue()));
-            } else if (op.equals(PyTokenTypes.MULT)) {
+            }/* else if (op.equals(PyTokenTypes.MULT)) {
                 return new PyConditionValue(left.getValue().multiply(right.getValue()));
             } else if (op.equals(PyTokenTypes.DIV)) {
                 // TODO: FIX. This should be float division
