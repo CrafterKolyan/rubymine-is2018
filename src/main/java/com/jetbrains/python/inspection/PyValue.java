@@ -1,7 +1,5 @@
 package com.jetbrains.python.inspection;
 
-import com.jetbrains.python.psi.PyBinaryExpression;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
@@ -10,7 +8,7 @@ public class PyValue {
         UNDEFINED,
         BIG_INTEGER,
         BIG_DECIMAL,
-        OBJECT;
+        OBJECT
     }
 
     public static final PyValue ZERO = new PyValue(BigInteger.ZERO);
