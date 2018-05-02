@@ -82,14 +82,17 @@ if 1 + 18 % 2.3 < 0:
 
 if 10 & 12.3:
     # undefined. no RUNTIME here
+    # Warning: unsupported types
     pass
 
 if 13.3 ^ 12.3:
     # undefined. no RUNTIME here
+    # Warning: unsupported types
     pass
 
 if 10 | 12.3:
     # undefined. no RUNTIME here
+    # Warning: unsupported types
     pass
 
 if 78462 <= 2.5 ** 12.3 <= 78463:
@@ -116,4 +119,9 @@ if 1 - 1e-6 < 5.0 // 4.0 < 1 + 1e-6:
 
 if 1 - 1e-6 < -5.0 // -4.0 < 1 + 1e-6:
     # true
+    pass
+
+if ~1.5:
+    # undefined. no RUNTIME here
+    # Warning: unsupported type
     pass

@@ -53,6 +53,8 @@ public class PyConstantExpression extends PyInspection {
                 BOOLEAN_AND_VALUE
             }
 
+            private static final PyConditionValue UNDEFINED = new PyConditionValue();
+
             private Type type;
             private boolean result;
             private PyValue value;
@@ -138,7 +140,7 @@ public class PyConstantExpression extends PyInspection {
             } else if (pyExpr instanceof PyParenthesizedExpression) {
                 return processParExpr((PyParenthesizedExpression) pyExpr);
             }
-            return new PyConditionValue();
+            return PyConditionValue.UNDEFINED;
         }
 
         private PyConditionValue processBoolLiteral(PyBoolLiteralExpression pyExpr) {
@@ -158,7 +160,7 @@ public class PyConstantExpression extends PyInspection {
             PyElementType operator = pyExpr.getOperator();
 
             if (!operand.isDetermined()) {
-                return new PyConditionValue();
+                return PyConditionValue.UNDEFINED;
             }
 
             if (operator.equals(PyTokenTypes.PLUS)) {
@@ -168,9 +170,13 @@ public class PyConstantExpression extends PyInspection {
             } else if (operator.equals(PyTokenTypes.NOT_KEYWORD)) {
                 return new PyConditionValue(!operand.getBoolean());
             } else if (operator.equals(PyTokenTypes.TILDE)) {
+                if (!operand.getValue().isInteger()) {
+                    registerProblem(pyExpr, "Unsupported operand type (" + operand.getValue().getTypeString() + ")");
+                    return PyConditionValue.UNDEFINED;
+                }
                 return new PyConditionValue(operand.getValue().negate().subtract(PyValue.ONE));
             } else {
-                return new PyConditionValue();
+                return PyConditionValue.UNDEFINED;
             }
         }
 
@@ -193,7 +199,7 @@ public class PyConstantExpression extends PyInspection {
             }
 
             if (!left.isDetermined() || !right.isDetermined() || !left.getValue().isNumber() || !right.getValue().isNumber()) {
-                return new PyConditionValue();
+                return PyConditionValue.UNDEFINED;
             }
 
             if (op.equals(PyTokenTypes.LTLT) || op.equals(PyTokenTypes.GTGT)
@@ -202,7 +208,7 @@ public class PyConstantExpression extends PyInspection {
                     registerProblem(pyExpr,
                             "Unsupported operand types (" + left.getValue().getTypeString() + " and " +
                                     right.getValue().getTypeString() + ")");
-                    return new PyConditionValue();
+                    return PyConditionValue.UNDEFINED;
                 }
             }
 
@@ -243,7 +249,7 @@ public class PyConstantExpression extends PyInspection {
                 PyValue divider = right.getValue();
                 if (divider.equals(PyValue.ZERO)) {
                     registerProblem(pyExpr, "Division by 0");
-                    return new PyConditionValue();
+                    return PyConditionValue.UNDEFINED;
                 }
                 return new PyConditionValue(left.getValue().divide(divider));
             } else if (op.equals(PyTokenTypes.EXP)) {
@@ -254,18 +260,18 @@ public class PyConstantExpression extends PyInspection {
                         return new PyConditionValue(PyValue.ONE);
                     } else if (r.compareTo(PyValue.ZERO) < 0) {
                         registerProblem(pyExpr, "0 cannot be raised to a negative power (" + r + ")");
-                        return new PyConditionValue();
+                        return PyConditionValue.UNDEFINED;
                     }
                 }
                 if (!r.isInteger()) {
-                    return new PyConditionValue();
+                    return PyConditionValue.UNDEFINED;
                 }
                 return new PyConditionValue(left.getValue().pow(right.getValue()));
             } else if (op.equals(PyTokenTypes.FLOORDIV)) {
                 PyValue divider = right.getValue();
                 if (divider.equals(PyValue.ZERO)) {
                     registerProblem(pyExpr, "Division by 0");
-                    return new PyConditionValue();
+                    return PyConditionValue.UNDEFINED;
                 }
                 return new PyConditionValue(left.getValue().floordivide(divider));
             } else if (op.equals(PyTokenTypes.PERC)) {
@@ -273,19 +279,19 @@ public class PyConstantExpression extends PyInspection {
                 PyValue divider = right.getValue();
                 if (divider.equals(PyValue.ZERO)) {
                     registerProblem(pyExpr, "Taking modulo by 0");
-                    return new PyConditionValue();
+                    return PyConditionValue.UNDEFINED;
                 }
                 return new PyConditionValue(divisor.mod(divider));
             } else if (op.equals(PyTokenTypes.LTLT)) {
                 if (right.getValue().compareTo(PyValue.ZERO) < 0) {
                     registerProblem(pyExpr, "Shifting by negative number (" + right.getValue() + ")");
-                    return new PyConditionValue();
+                    return PyConditionValue.UNDEFINED;
                 }
                 return new PyConditionValue(left.getValue().shiftLeft(right.getValue()));
             } else if (op.equals(PyTokenTypes.GTGT)) {
                  if (right.getValue().compareTo(PyValue.ZERO) < 0) {
                     registerProblem(pyExpr, "Shifting by negative number (" + right.getValue() + ")");
-                    return new PyConditionValue();
+                    return PyConditionValue.UNDEFINED;
                 }
                 return new PyConditionValue(left.getValue().shiftRight(right.getValue()));
             } else if (op.equals(PyTokenTypes.XOR)) {
@@ -295,7 +301,7 @@ public class PyConstantExpression extends PyInspection {
             } else if (op.equals(PyTokenTypes.OR)) {
                 return new PyConditionValue(left.getValue().or(right.getValue()));
             }
-            return new PyConditionValue();
+            return PyConditionValue.UNDEFINED;
         }
 
         private PyConditionValue processParExpr(PyParenthesizedExpression pyExpr) {
