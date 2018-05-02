@@ -114,3 +114,23 @@ if 0 ** (25 // 6 - 5) == 1:
     # undefined behaviour. Here should be no RUNTIME
     # Warning: 0 cannot be raised to a negative power (-1)
     pass
+
+if (1 < 2 or 3) == True:
+    # true
+    pass
+
+if (1 < 2 or 3) == 2:
+    # false
+    pass
+
+if (1 < 2) << 1 == 2:
+    # true
+    pass
+
+if (1 < 2) + (2 > 1) == 2:
+    # true
+    pass
+
+if (1 < 2) + 3 == 4:
+    # true
+    pass

@@ -116,6 +116,14 @@ public class PyConstantExpression extends PyInspection {
              * @return BigInteger result of condition expression
              */
             private PyValue getValue() { return value; }
+
+            private PyConditionValue normalize() {
+                if (type == Type.BOOLEAN_AND_VALUE) {
+                    type = Type.BOOLEAN;
+                    value = result ? PyValue.ONE : PyValue.ZERO;
+                }
+                return this;
+            }
         }
 
         private PyConditionValue process(PyExpression pyExpr) {
@@ -173,9 +181,9 @@ public class PyConstantExpression extends PyInspection {
 
             if (left.isDetermined()) {
                 if (op.equals(PyTokenTypes.AND_KEYWORD)) {
-                    return left.getBoolean() ? right : left;
+                    return left.getBoolean() ? right.normalize() : left.normalize();
                 } else if (op.equals(PyTokenTypes.OR_KEYWORD)) {
-                    return left.getBoolean() ? left : right;
+                    return left.getBoolean() ? left.normalize() : right.normalize();
                 } else if (left.type == PyConditionValue.Type.BOOLEAN_AND_VALUE && !left.getBoolean()
                         && (op.equals(PyTokenTypes.LT) || op.equals(PyTokenTypes.LE)
                         || op.equals(PyTokenTypes.GT) || op.equals(PyTokenTypes.GE)
@@ -222,7 +230,10 @@ public class PyConstantExpression extends PyInspection {
                 return new PyConditionValue(PyConditionValue.Type.BOOLEAN_AND_VALUE,
                         left.getValue().compareTo(right.getValue()) != 0,
                         right.getValue());
-            } else if (op.equals(PyTokenTypes.PLUS)) {
+            }
+            left.normalize();
+            right.normalize();
+            if (op.equals(PyTokenTypes.PLUS)) {
                 return new PyConditionValue(left.getValue().add(right.getValue()));
             } else if (op.equals(PyTokenTypes.MINUS)) {
                 return new PyConditionValue(left.getValue().subtract(right.getValue()));
